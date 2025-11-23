@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aksarasa</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <h1 data-translate="appTitle"></h1>
+                <p class="subtitle" data-translate="scanInstruction">Scan barcode untuk mendengar informasi koleksi museum</p>
+            </div>
+            <button id="lang-toggle" class="lang-toggle">
+                <span id="lang-text">EN</span>
+            </button>
+        </header>
+
+        <main class="main-content">
+            <div class="scan-buttons">
+                <button id="scan-btn" class="scan-button scan-camera">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                        <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                    <span>Scan dengan Kamera</span>
+                </button>
+                
+                <button id="upload-btn" class="scan-button scan-upload">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <span data-translate="uploadButton">Upload Gambar Barcode</span>
+                </button>
+                
+                <input type="file" id="file-input" accept="image/*" style="display: none;">
+            </div>
+
+            <div class="info-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                <p data-translate="infoBoxText">Arahkan kamera smartphone Anda ke barcode atau QR code yang tersedia di setiap koleksi museum untuk mendengar penjelasan lengkap</p>
+            </div>
+
+            <section class="history-section">
+                <div class="section-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                        <path d="M12 7v5l4 2"/>
+                    </svg>
+                    <h2 data-translate="historyTitle">Riwayat Scan</h2>
+                </div>
+
+                <div id="history-list" class="history-list">
+                </div>
+
+                <div id="empty-history" class="empty-state">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <path d="M9 9h6M9 15h6"/>
+                    </svg>
+                    <p data-translate="emptyHistory">Belum ada riwayat scan</p>
+                    <span>Scan barcode untuk memulai</span>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="app-footer">
+            <p>Copyright by AKSARASA</p>
+        </footer>
+    </div>
+
+    <div id="scanner-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-translate="scanTitle">Scan Barcode</h3>
+                <button id="close-scanner" class="close-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="reader"></div>
+            <div class="scanner-instructions">
+                <p data-translate="scanInstruction">Arahkan kamera ke barcode untuk memindai</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="upload-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Preview Gambar</h3>
+                <button id="close-upload" class="close-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="upload-preview">
+                <img id="preview-image" src="" alt="Preview">
+                <div id="upload-status" class="upload-status">Memindai barcode...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="detail-modal" class="modal">
+        <div class="modal-content detail-modal-content">
+            <div class="modal-header">
+                <button id="close-detail" class="close-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="detail-content">
+                <div class="detail-image">
+                    <img id="detail-image" src="" alt="Item">
+                </div>
+                <h2 id="detail-title"></h2>
+                <div class="detail-meta">
+                    <span class="category-badge" id="detail-category"></span>
+                    <span class="duration-badge" id="detail-duration">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <span id="duration-text"></span>
+                    </span>
+                </div>
+                <div class="detail-description">
+                    <p id="detail-description"></p>
+                </div>
+                <div class="audio-controls">
+                    <button id="play-audio-btn" class="audio-btn play-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                        <span data-translate="playAudio">Dengarkan Penjelasan</span>
+                    </button>
+                    <button id="pause-audio-btn" class="audio-btn pause-btn" style="display: none;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <rect x="6" y="4" width="4" height="16"/>
+                            <rect x="14" y="4" width="4" height="16"/>
+                        </svg>
+                        <span data-translate="pauseAudio">Pause Audio</span>
+                    </button>
+                    <div class="audio-status" id="audio-status"></div>
+                </div>
+                
+                <button id="chat-with-ai-btn" class="chat-ai-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span data-translate="chatWithMascot">Tanya Maskot AI</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="chat-modal" class="modal">
+        <div class="modal-content chat-modal-content">
+            <div class="modal-header">
+                <div class="chat-header-info">
+                    <div class="mascot-avatar">🤖</div>
+                    <div>
+                        <h3 data-translate="mascotName">Musi - Maskot Museum</h3>
+                        <p class="mascot-status" data-translate="mascotStatus">Siap membantu Anda</p>
+                    </div>
+                </div>
+                <button id="close-chat" class="close-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div id="chat-messages" class="chat-messages">
+            </div>
+            
+            <div class="chat-input-container">
+                <input type="text" id="chat-input" class="chat-input" placeholder="Tanya sesuatu tentang item ini..." data-translate-placeholder="askQuestion">
+                <button id="send-chat-btn" class="send-chat-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p>Memproses...</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
